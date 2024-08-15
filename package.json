@@ -1,0 +1,21 @@
+{
+  "name": "nithjs-media",
+  "version": "0.0.1",
+  "main": ".out/main.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Bao Le Dao Cong <cbstorm.dev@gmail.com>",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.3.0",
+    "typescript": "^5.5.4",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.3",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12"
+  }
+}
