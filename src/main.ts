@@ -1,2 +1,2 @@
-export * from './ffmpeg';
+export * from './media';
 export * from './srt';

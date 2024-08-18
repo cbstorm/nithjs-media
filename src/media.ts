@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { Utils } from './utils';
-export class FFmpeg {
+export class Media {
   private _path: string;
   private _defaultOut: string;
   constructor(filePath: string) {
@@ -11,16 +11,16 @@ export class FFmpeg {
     );
   }
   async Info(outPath: string) {
-    const commandBuilder = new FFmpegCommandBuilder().In(this._path).Info().Out(outPath);
+    const commandBuilder = new FFprobeCommandBuilder().Input(this._path);
     const res = await Utils.ExecAsync(commandBuilder.Build());
     console.log(res);
   }
   async ToAudio(inp?: { outPath?: string; timeStart?: number; duration?: number }) {
     const commandBuilder = new FFmpegCommandBuilder()
-      .In(this._path)
+      .Input(this._path)
       .Audio()
-      .Out(inp?.outPath || this._defaultOut)
-      .OutExt(inp?.outPath ? '' : '.mp3')
+      .Output(inp?.outPath || this._defaultOut)
+      .OutputExt(inp?.outPath ? '' : '.mp3')
       .Y();
     if (inp?.timeStart) {
       commandBuilder.TimeStart(inp?.timeStart);
@@ -32,25 +32,25 @@ export class FFmpeg {
   }
 }
 
-export class FFmpegCommandBuilder {
+class FFmpegCommandBuilder {
   private _bin: string = 'ffmpeg';
   private _input: string = '';
   private _output: string = '';
   private _outExt: string = '';
-  private _y?: boolean = false;
+  private _y: boolean = false;
   private _audio: string = '';
   private _time_start: string = '';
   private _duration: string = '';
   private _info: string = '';
-  In(input: string) {
+  Input(input: string) {
     this._input = `-i ${input}`;
     return this;
   }
-  Out(output: string) {
+  Output(output: string) {
     this._output = output;
     return this;
   }
-  OutExt(ext: string) {
+  OutputExt(ext: string) {
     this._outExt = ext;
     return this;
   }
@@ -70,15 +70,25 @@ export class FFmpegCommandBuilder {
     this._audio = '-map 0:a';
     return this;
   }
-  Info() {
-    this._bin = 'ffprobe';
-    this._info = `-v quiet -print_format json -show_format`;
-    return this;
-  }
   Build() {
     this._output = `${this._output}${this._outExt}`;
     const y = this._y ? '-y' : '';
     return [this._bin, this._input, this._audio, this._time_start, this._duration, this._info, y, this._output]
+      .filter(Boolean)
+      .join(' ');
+  }
+}
+
+class FFprobeCommandBuilder {
+  private _bin: string = 'ffprobe';
+  private _input: string = '';
+  constructor() {}
+  Input(input: string) {
+    this._input = input;
+    return this;
+  }
+  Build() {
+    return [this._bin, '-loglevel 0', '-print_format json', '-show_format', '-show_streams', this._input]
       .filter(Boolean)
       .join(' ');
   }
